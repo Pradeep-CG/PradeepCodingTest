@@ -10,13 +10,33 @@ import UIKit
 
 class CanadaViewController: UIViewController {
 
+    var httpUtility:HttpUtility?
+    var canadaList:CanadaModel?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        view.backgroundColor = .red
+        view.backgroundColor = .white
+        httpUtility = HttpUtility()
+        
         // Do any additional setup after loading the view.
+        retrieveDataFromApi()
     }
     
+    func retrieveDataFromApi() {
+        
+        httpUtility?.getApiData(requestUrl: Common.apiString, resultType: CanadaModel.self, completionHandler: { (canadaResponse) in
+                self.canadaList = canadaResponse
+                debugPrint("response = \(String(describing: self.canadaList))")
+                print("title = \(self.canadaList?.title ?? "")")
+                
+                DispatchQueue.main.async {
+                    
+                    self.navigationItem.title = self.canadaList?.title
+                    
+                }
+            })
+    }
 
     /*
     // MARK: - Navigation
