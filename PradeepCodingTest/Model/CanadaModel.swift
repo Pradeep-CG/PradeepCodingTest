@@ -13,7 +13,7 @@ struct CanadaModel: Decodable {
     let rows: [CanadaRowModel]
 }
 
-// MARK: - Row
+// MARK: - CanadaRowModel
 struct CanadaRowModel: Decodable {
     let title, rowDescription: String?
     let imageHref: String?
