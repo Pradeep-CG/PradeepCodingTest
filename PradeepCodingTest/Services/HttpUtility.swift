@@ -37,5 +37,51 @@ struct HttpUtility{
             .resume()
         }
     }
+    
+    func downloadImage(urlString:String,index:IndexPath, completionHandler:@escaping (_ result:(String, UIImage, IndexPath)) -> Void) {
+        
+        let session = URLSession(configuration: .default)
+        
+        //creating a dataTask
+        let getImageFromUrl = session.dataTask(with: URL(string: urlString)!) { (data, response, error) in
+            
+            //if there is any error
+            if let e = error {
+                //displaying the message
+                print("Error Occurred: \(e)")
+                
+            } else {
+                //checking wheather the response is nil or not
+                if (response as? HTTPURLResponse) != nil {
+                    
+                    //checking if the response contains an image
+                    if let imageData = data {
+                        
+                        //getting the image
+                        if let image = UIImage(data: imageData){
+                          
+                            completionHandler((urlString, image, index))
+                        }
+                        else{
+                            let image = UIImage(named: "noImage")
+                                                   completionHandler((urlString, image!, index))
+                                                   print("Image file is currupted")
+                        }
+                    } else {
+                        let image = UIImage(named: "noImage")
+                        completionHandler((urlString, image!, index))
+                        print("Image file is currupted")
+                    }
+                } else {
+                    let image = UIImage(named: "noImage")
+                    completionHandler((urlString, image!, index))
+                    print("No response from server")
+                }
+            }
+        }
+        
+        //starting the download task
+        getImageFromUrl.resume()
+    }
 }
 

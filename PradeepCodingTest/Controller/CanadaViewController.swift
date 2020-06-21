@@ -14,6 +14,7 @@ class CanadaViewController: UIViewController {
     var httpUtility:HttpUtility?
     var canadaList:CanadaModel?
     var canadaTableView = UITableView()
+    let cache = NSCache<NSString, UIImage>()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,6 +34,10 @@ class CanadaViewController: UIViewController {
         canadaTableView.translatesAutoresizingMaskIntoConstraints = false
         canadaTableView.delegate = self
         canadaTableView.dataSource = self
+        
+         //canadaTableView.estimatedRowHeight = 80.0
+//        canadaTableView.rowHeight = UITableView.automaticDimension
+   
         canadaTableView.register(CanadaTableViewCell.self, forCellReuseIdentifier: "canadaCell")
         canadaTableView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
         canadaTableView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
@@ -47,7 +52,7 @@ class CanadaViewController: UIViewController {
     func retrieveDataFromApi() {
         
         httpUtility?.getApiData(requestUrl: Common.apiString, resultType: CanadaModel.self, completionHandler: { (canadaResponse) in
-                self.canadaList = canadaResponse
+            self.canadaList = canadaResponse
                 //debugPrint("response = \(String(describing: self.canadaList))")
                 print("title = \(self.canadaList?.title ?? "")")
                 
@@ -73,6 +78,28 @@ extension CanadaViewController: UITableViewDelegate, UITableViewDataSource{
         if let rowDict = canadaList?.rows[indexPath.row]{
             cell.rowData = rowDict
         }
+        if let imgHref = canadaList?.rows[indexPath.row].imageHref {
+            
+            if (cache.object(forKey: imgHref as NSString) != nil) {
+                cell.rowImageView.image = Common.scaleUIImageToSize(image: cache.object(forKey: imgHref as NSString)!)
+            }
+            else{
+                httpUtility?.downloadImage(urlString: imgHref, index: indexPath, completionHandler: { (imageUrl,downloadedImage, imgIndexPath) in
+                    print("imageUrl = \(imageUrl)")
+                    
+                    DispatchQueue.main.sync {
+                        //cell.imageView?.image = self.scaleUIImageToSize(image: downloadedImage)
+                        self.cache.setObject(downloadedImage, forKey: imageUrl as NSString)
+                        //self.tblView.reloadData()
+                        self.canadaTableView.reloadRows(at: [imgIndexPath], with: .none)
+                    }
+                })
+            }
+        }
+        else{
+            cell.rowImageView.image = Common.scaleUIImageToSize(image: UIImage(named: "noImage")!)
+        }
+        
         return cell
     }
     

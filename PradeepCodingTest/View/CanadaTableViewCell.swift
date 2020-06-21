@@ -12,9 +12,9 @@ class CanadaTableViewCell: UITableViewCell {
     
     let rowImageView:UIImageView = {
         let img = UIImageView()
-        img.contentMode = .scaleAspectFill // image will never be strecthed vertially or horizontally
+        img.contentMode = .scaleAspectFill 
         img.translatesAutoresizingMaskIntoConstraints = false // enable autolayout
-        img.layer.cornerRadius = 35
+        img.layer.cornerRadius = 15
         img.clipsToBounds = true
         return img
     }()
@@ -40,7 +40,7 @@ class CanadaTableViewCell: UITableViewCell {
             descriptionLabel.text = rowData?.rowDescription
         }
     }
-    
+
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
