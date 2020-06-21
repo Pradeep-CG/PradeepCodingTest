@@ -10,15 +10,16 @@ import UIKit
 import Foundation
 
 class CanadaViewController: UIViewController {
-
+    
     var httpUtility:HttpUtility?
     var canadaList:CanadaModel?
     var canadaTableView = UITableView()
     let cache = NSCache<NSString, UIImage>()
+    private let refreshControl = UIRefreshControl()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         view.backgroundColor = .white
         httpUtility = HttpUtility()
         
@@ -34,10 +35,10 @@ class CanadaViewController: UIViewController {
         canadaTableView.translatesAutoresizingMaskIntoConstraints = false
         canadaTableView.delegate = self
         canadaTableView.dataSource = self
+        canadaTableView.refreshControl = refreshControl
+        // Configure Refresh Control
+        refreshControl.addTarget(self, action: #selector(refreshTableData(_:)), for: .valueChanged)
         
-         //canadaTableView.estimatedRowHeight = 80.0
-//        canadaTableView.rowHeight = UITableView.automaticDimension
-   
         canadaTableView.register(CanadaTableViewCell.self, forCellReuseIdentifier: "canadaCell")
         canadaTableView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
         canadaTableView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
@@ -49,22 +50,50 @@ class CanadaViewController: UIViewController {
         self.navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor:#colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)]
         
     }
+    @objc private func refreshTableData(_ sender: Any) {
+        // Fetch Data from api
+        print("refresh")
+        retrieveDataFromApi()
+    }
+    
+    //MARK: - Api Call
     func retrieveDataFromApi() {
         
-        httpUtility?.getApiData(requestUrl: Common.apiString, resultType: CanadaModel.self, completionHandler: { (canadaResponse) in
-            self.canadaList = canadaResponse
+        if Reachability.isConnectedToNetwork(){
+            print("Internet Connection Available!")
+            
+            // make api call
+            httpUtility?.getApiData(requestUrl: Common.apiString, resultType: CanadaModel.self, completionHandler: { (canadaResponse) in
+                self.canadaList = canadaResponse
                 //debugPrint("response = \(String(describing: self.canadaList))")
                 print("title = \(self.canadaList?.title ?? "")")
                 
                 DispatchQueue.main.async {
-                    
+                    self.refreshControl.endRefreshing()
                     self.navigationItem.title = self.canadaList?.title
                     self.canadaTableView.reloadData()
                 }
             })
+            
+        }else{
+            print("Internet Connection not Available!")
+            
+            // create the alert
+            let alert = UIAlertController(title: "Message", message: "Internet Connection not Available!", preferredStyle: UIAlertController.Style.alert)
+            
+            // add an action (button)
+            alert.addAction(UIAlertAction(title: "OK", style: UIAlertAction.Style.default, handler: {action in
+                self.refreshControl.endRefreshing()
+            }))
+            
+            // show the alert
+            self.present(alert, animated: true, completion: nil)
+        }
     }
 }
 
+
+// MARK:- Table datasource and Delegate
 extension CanadaViewController: UITableViewDelegate, UITableViewDataSource{
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
