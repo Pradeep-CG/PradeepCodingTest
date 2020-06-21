@@ -10,11 +10,11 @@ import Foundation
 // MARK: - Canada
 struct CanadaModel: Decodable {
     let title: String
-    let rows: [Row]
+    let rows: [CanadaRowModel]
 }
 
 // MARK: - Row
-struct Row: Decodable {
+struct CanadaRowModel: Decodable {
     let title, rowDescription: String?
     let imageHref: String?
 
