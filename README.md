@@ -63,6 +63,6 @@ Additional Requirements
 
 • Please usea TableView as the container
 
-[Imgur](https://i.imgur.com/q47jJqW.png)
+
 
 
